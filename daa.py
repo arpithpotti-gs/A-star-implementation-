@@ -1,4 +1,4 @@
-import heapq
+import heapq	
 import math
 class Node:
 	def __init__(self):
@@ -11,6 +11,7 @@ class Node:
 		self.x = None
 		self.y = None
 		self.parent = None
+		self.parent2 = None
 
 	def __lt__(self,other):
 		return self.f < other.f
@@ -38,47 +39,78 @@ class Maze:
 
 	def find_path(self,startx,starty,endx,endy):
 		opened = []
+		opened2 = []
+		closed2 = []
 		closed = []
 		start = self.nodes[startx][starty]
+		start2 = self.nodes[endx][endy]
+		start2.parent = start2
 		start.parent = start
 		start.g = 0
+		start2.g = 0
+		start2.f = 0
 		start.f = 0
 		opened.append(start)
-		while(len(opened) > 0):	
+		opened2.append(start2)
+		while(len(opened) > 0 and len(opened2) > 0):	
 			#O(n)
 			heapq.heapify(opened)
+			heapq.heapify(opened2)
 			q = heapq.heappop(opened)
+			q2 = heapq.heappop(opened2)
+			if(q == q2):
+				print("Path Found!")
+				print("Path is:")
+				print(q.x,q.y)
+				a = q.parent
+				b = q.parent2
+
+				while(a.parent!=a and b.parent != b):
+					print(a.x,a.y,"      ",b.x,b.y)
+					a = a.parent
+					b = b.parent		
+				print(a.x,a.y,"      ",b.x,b.y)							
+				return
 			neighbours = self.get_neighbours(q)
+			neighbours2 = self.get_neighbours(q2)			
 			for neighbour in neighbours:
 				if neighbour.parent == None:
 					neighbour.parent = q
-				if neighbour.x == endx and neighbour.y == endy:
-					print("Path found!")
-					print("Path is: ")
-					while(neighbour.parent != neighbour):
-						print(neighbour.x,neighbour.y)
-						neighbour = neighbour.parent
-					print(neighbour.x,neighbour.y)
+				prevf = neighbour.f					
+				neighbour.g = q.g + 1
+				#Euclidean Distance
+				neighbour.h = math.sqrt((neighbour.x - endx)** 2+(neighbour.y - endy)** 2)
+				neighbour.f = neighbour.g + neighbour.h
 
-					return
-				else:
-
-					prevf = neighbour.f					
-					neighbour.g = q.g + 1
-					#Euclidean Distance
-					neighbour.h = math.sqrt(abs((neighbour.x - endx)* 2 +(neighbour.y - endy)* 2))
-					neighbour.f = neighbour.g + neighbour.h
-
-					if neighbour in opened or neighbour in closed:
-						if neighbour.f < prevf:
-							opened.append(neighbour)
-
-						else:
-							neighbour.f = prevf
-					else:
+				if neighbour in opened or neighbour in closed:
+					if neighbour.f < prevf:
 						opened.append(neighbour)
+
+					else:
+						neighbour.f = prevf
+				else:
+					opened.append(neighbour)
 			closed.append(q)
 
+			for neighbour2 in neighbours2:
+				if neighbour2.parent == None:
+					neighbour2.parent = q2
+				else:
+					neighbour2.parent2 = q2
+				prevf = neighbour2.f					
+				neighbour2.g = q2.g + 1
+				#Euclidean Distance
+				neighbour2.h = math.sqrt((neighbour2.x - startx)** 2 +(neighbour2.y - starty)** 2)
+				neighbour2.f = neighbour2.g + neighbour2.h
+
+				if neighbour2 in opened2 or neighbour2 in closed2:
+					if neighbour2.f < prevf:
+						opened2.append(neighbour2)
+					else:
+						neighbour2.f = prevf
+				else:
+					opened2.append(neighbour2)
+			closed2.append(q2)
 		print("No path found!")
 
 	def get_neighbours(self,a):
