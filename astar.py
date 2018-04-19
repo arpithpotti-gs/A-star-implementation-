@@ -43,6 +43,7 @@ class Maze:
 	def find_path(self,startx,starty,endx,endy):
 		starttime = time.time()
 		self.path_length = 0
+		self.visited = 0
 		opened = []
 		opened2 = []
 		closed2 = []
@@ -57,7 +58,8 @@ class Maze:
 		start.f = 0
 		opened.append(start)
 		opened2.append(start2)
-		while(len(opened) > 0 and len(opened2) > 0):	
+		while(len(opened) > 0 and len(opened2) > 0):
+			self.visited = self.visited + 1	
 			#O(n)
 			heapq.heapify(opened)
 			heapq.heapify(opened2)
@@ -94,13 +96,15 @@ class Maze:
 						y.symbol = '%'
 						y = y.parent
 					print("Path found!")
-					print("Searched space is:")
+					print("Path is:")
+					print("----------------------------------------------------------")
 					for i in range(self.n):
 						for j in range(self.n):
 							print(self.nodes[i][j].symbol,end = "")
 						print()	
 					print("Time taken is :",endtime - starttime)
 					print("Length of the shortest path is",self.path_length + 1)	
+					print(self.visited)
 					return
 				if neighbour in opened or neighbour in closed:
 					if neighbour.f < prevf:
@@ -123,7 +127,7 @@ class Maze:
 					neighbour2.parent2 = q2
 				if neighbour2.symbol == '*':
 					endtime = time.time()
-					print("Path         found")
+					print("Path found")
 					x = neighbour2
 					y = q2.parent2
 					q2.symbol = '%'
@@ -135,13 +139,15 @@ class Maze:
 						self.path_length = self.path_length + 1
 						y.symbol = '%'
 						y = y.parent					
-					print("Searched Space is:")
+					print("Path is:")
+					print("----------------------------------------------------------")
 					for i in range(self.n):
 						for j in range(self.n):
 							print(self.nodes[i][j].symbol,end = "")
 						print()	
 					print("Time taken is :",endtime - starttime)	
-					print("Length of the shortest path is",self.path_length + 1)				
+					print("Length of the shortest path is",self.path_length + 1)
+					print(self.visited)
 					return
 				if neighbour2 in opened2 or neighbour2 in closed2:
 					if neighbour2.f < prevf:
